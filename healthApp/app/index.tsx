@@ -4,6 +4,8 @@ import { useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Picker } from '@react-native-picker/picker';
+
 
 type Questions = {
   key: string,
@@ -41,7 +43,7 @@ export default function Index() {
         const hasOnboarded = await AsyncStorage.getItem("hasOnboarded");
         if(hasOnboarded === "true") {
           //just for now to test on board page
-          await AsyncStorage.setItem("hasOnboarded", "false");
+          //await AsyncStorage.setItem("hasOnboarded", "false");
           router.replace("/pages/scan")
         }
 
@@ -72,6 +74,8 @@ export default function Index() {
   const goBack = () => {
     if(step != 0) {
       setStep(step - 1)
+    } else {
+      setPhase("landing")
     }
   }
 
@@ -117,22 +121,40 @@ export default function Index() {
             </View>
           <Text style={styles.prompt}>{q.prompt}</Text>
         
+          {q.key === "age" ? (
+            
+              <Picker
+                selectedValue={answers[q.key] ?? "18"}
+                onValueChange={(value) => onChangeValue(String(value))}
+                style={styles.picker}
+                itemStyle={styles.pickerItem}
+              >
+                {Array.from({ length: 99 }, (_, i) => (
+                  <Picker.Item
+                  key={i + 1}
+                  label={`${i + 1}`}
+                  color="rgb(102,178,255)"
+                  />
+                ))}
+              </Picker>
+            ) : (
+              <TextInput
+                style={styles.input}
+                placeholder={q.placeholder}
+                placeholderTextColor="#9aa0a6"
+                value={answers[q.key] ?? ""}
+                onChangeText={onChangeValue}
+              />
+                )}
 
-        <TextInput 
-        style={styles.input}
-        placeholder={q.placeholder}
-        placeholderTextColor="#9aa0a6"
-        value={answers[q.key] ?? ""}
-        onChangeText={onChangeValue}
-        />
         </View>
         
         <View style={styles.footer}>
           <View style={styles.row}>
             <Pressable
               onPress={goBack}
-              style={[styles.secondaryBtn, step === 0 && { opacity: 0.5 }]}
-              disabled={step === 0}
+              style={styles.secondaryBtn}
+              
             >
               <Text style={styles.secondaryText}>Back</Text>
             </Pressable>
@@ -235,5 +257,16 @@ const styles = StyleSheet.create({
     },
     barActive: { backgroundColor: 'rgb(102,178,255)' },
     barInactive: { backgroundColor: '#e6eef6' },
+    
+    picker: {
+      width: "100%",
+      height: 180, // gives it scroll-wheel height
+    },
+    
+    pickerItem: {
+      color: "rgb(102,178,255)",
+      fontSize: 18,
+      fontWeight: "600",
+    },
 });
 
