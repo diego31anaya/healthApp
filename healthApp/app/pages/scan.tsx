@@ -1,10 +1,18 @@
 import { View, Text, StyleSheet, Pressable, AppState} from 'react-native'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useIsFocused } from '@react-navigation/native';
+import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
+
+import ProductPage from '../product/productPage';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const scan = () => {
+
+  const [productData, setProductData] = useState<any | null>(null);
+
   const router = useRouter();
   const [permission, requestPermission] = useCameraPermissions();
   const isPermissionGranted = Boolean(permission?.granted);
@@ -13,9 +21,25 @@ const scan = () => {
 
   const [scanned, setScanned] = useState(false);
 
+  const sheetRef = useRef<BottomSheet>(null);
+  const [isOpen, setIsOpen] = useState(false)
+
+  const snapPoints = ['20%']
+
+  const handleSnapPress = useCallback((index: number) => {
+    sheetRef.current?.snapToIndex(index)
+    setIsOpen(true)
+  }, [])
+
+  const handleSheetClose = () => {
+    setIsOpen(false)
+    setScanned(false)
+  }
+
   const handleBarCodeScanned = async ({ data }: { data: string }) => {
    
     if(!scanned) {
+      
       setScanned(true)
       try {
 
@@ -23,26 +47,23 @@ const scan = () => {
         const json = await response.json();
 
 
-        if(json.status === 1 && json.product?.product_name) {
-          const name = json.product.product_name
-          const image = json.product.image_url;
+        if(json.status === 1 && json.product) {
+          //get all the informaiton you want from the barcode
+          const name = json.product.product_name || 'Unknown product'
           const brand = json.product.brands || 'Unknown brand';
+          const image = json.product.image_url || null;
 
-          // router.push({
-          //   pathname: `/product/${data}`,
-          //   params: {
-          //     name,
-          //     brand,
-          //     image
-          //   }
-          // });
-        } else {
-          setScanned(false)
-          console.log("Product not found")
+          setProductData({ name, brand, image })
+          
+          handleSnapPress(1);
+
         }
       } catch (error) {
         setScanned(false)
-        console.error(error)      
+        console.error(error);
+
+        setProductData({ error: true })
+        handleSnapPress(1);
       }
     }
   }
@@ -63,6 +84,21 @@ const scan = () => {
         onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
         active={isFocused}
         >
+
+          <BottomSheet
+          ref={sheetRef}
+          snapPoints={snapPoints}
+          enablePanDownToClose={true}
+          onClose={handleSheetClose}
+          index={-1}
+          >
+              <BottomSheetView>
+                {productData ? 
+                <ProductPage data={productData} /> : 
+                <Text>Loading</Text>}
+
+              </BottomSheetView>
+          </BottomSheet>
           
         </CameraView>
       )}

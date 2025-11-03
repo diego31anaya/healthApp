@@ -1,12 +1,24 @@
 import { View, Text, StyleSheet, Pressable } from 'react-native'
-import React from 'react'
+import React, { useCallback, useRef, useState } from 'react'
 import AntDesign from '@expo/vector-icons/AntDesign';
+import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
+
 
 const history = () => {
+  const sheetRef = useRef<BottomSheet>(null);
+  const [isOpen, setIsOpen] = useState(false)
+
+  const snapPoints = ['40%']
+
+  const handleSnapPress = useCallback((index: number) => {
+    sheetRef.current?.snapToIndex(index)
+    setIsOpen(true)
+  }, [])
+  
   return (
     <View style={[{ flex: 1 }, { backgroundColor: 'white '}]}>
         <View style={styles.header}>
-            <Pressable>
+            <Pressable onPress={() => handleSnapPress(1)}>
                 <Text style={styles.favoritesText}>
                     Favorites
                 </Text>
@@ -16,6 +28,18 @@ const history = () => {
                 <AntDesign name="info-circle" size={22} color='rgb(102,178,255)'/>
             </Pressable>
         </View>
+
+        <BottomSheet
+        ref={sheetRef}
+        snapPoints={snapPoints}
+        enablePanDownToClose={true}
+        onClose={() => setIsOpen(false)}
+        index={-1}
+        >
+            <BottomSheetView>
+              <Text>Hello</Text>
+            </BottomSheetView>
+        </BottomSheet>
     </View>
   )
 }

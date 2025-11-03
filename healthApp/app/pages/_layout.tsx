@@ -1,9 +1,11 @@
 import { Tabs } from "expo-router";
 import React from "react";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 export default function PagesLayout() {
     return (
+        <GestureHandlerRootView style={{ flex: 1 }}>
         <Tabs
             screenOptions={{ headerShown: false,
                 tabBarStyle: {
@@ -31,5 +33,6 @@ export default function PagesLayout() {
                 }}
             />
         </Tabs>
+        </GestureHandlerRootView>
     )
 }
