@@ -5,7 +5,7 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 const history = () => {
   return (
     <View style={[{ flex: 1 }, { backgroundColor: 'white '}]}>
-        <View style={styles.topContainer}>
+        <View style={styles.header}>
             <Pressable>
                 <Text style={styles.favoritesText}>
                     Favorites
@@ -23,7 +23,7 @@ const history = () => {
 export default history
 
 const styles = StyleSheet.create({
-    topContainer: {
+    header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
